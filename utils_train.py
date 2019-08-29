@@ -64,8 +64,9 @@ def train_model(model, dataloaders, criterion, optimizer, writer, device, num_ep
             epoch_acc = running_corrects.double() / len(dataloaders[phase].dataset)
 
             print('{} Loss: {:.4f} Acc: {:.4f}'.format(phase, epoch_loss, epoch_acc))
-            writer.add_scalar('epoch/loss', epoch_loss, epoch)
-            writer.add_scalar('epoch/acc', epoch_loss, epoch)            
+            
+            writer.add_scalar('epoch/loss_' + phase, epoch_loss, epoch)
+            writer.add_scalar('epoch/acc_' + phase, epoch_acc, epoch)            
 
             # deep copy the model and save if accuracy is better
             if phase == 'val' and epoch_acc > best_acc:
