@@ -8,7 +8,7 @@ import os
 import copy
 
 
-def train_model(model, dataloaders, criterion, optimizer, writer, num_epochs=25):    
+def train_model(model, dataloaders, criterion, optimizer, writer, device, num_epochs=25):    
     val_acc_history = []
 
     best_model_wts = copy.deepcopy(model.state_dict())
