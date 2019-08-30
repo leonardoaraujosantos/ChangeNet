@@ -8,7 +8,7 @@ import os
 import copy
 
 
-def train_model(model, dataloaders, criterion, optimizer, writer, device, num_epochs=25):    
+def train_model(model, dataloaders, criterion, optimizer, sc_plt, writer, device, num_epochs=25):    
     val_acc_history = []
 
     best_model_wts = copy.deepcopy(model.state_dict())
@@ -70,7 +70,16 @@ def train_model(model, dataloaders, criterion, optimizer, writer, device, num_ep
 
             print('{} Loss: {:.4f}'.format(phase, epoch_loss))
             
-            writer.add_scalar('epoch/loss_' + phase, epoch_loss, epoch)           
+            writer.add_scalar('epoch/loss_' + phase, epoch_loss, epoch)
+            
+            # Update Scheduler if training loss doesn't change for patience(2) epochs
+            if phase == 'train':
+                sc_plt.step(epoch_loss)
+                
+                # Get current learning rate (To display on Tensorboard)
+                for param_group in optimizer.param_groups:
+                    curr_learning_rate = param_group['lr']
+                    writer.add_scalar('epoch/learning_rate_' + phase, curr_learning_rate, epoch)
 
             # deep copy the model and save if accuracy is better
             if phase == 'val' and epoch_acc > best_acc:
