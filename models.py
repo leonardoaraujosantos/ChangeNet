@@ -44,23 +44,24 @@ class DeconvNetwork(nn.Module):
         self.img_size = img_size  
         self.num_classes = num_classes
         self.gen_img = nn.Sequential(
+            nn.BatchNorm2d(self.num_channels_input),
             nn.Conv2d(self.num_channels_input, self.num_classes,kernel_size=1),
             nn.ReLU(),
             nn.BatchNorm2d(self.num_classes),
             # in_channels, out_channels, kernel_size, stride=1, padding=0,
-            nn.ConvTranspose2d(self.num_classes, 16, 3, stride=1, padding=1),
-            nn.ReLU(),
-            nn.BatchNorm2d(16),
-            nn.ConvTranspose2d(16, 16, 3, stride=1),
-            nn.ReLU(),
-            nn.BatchNorm2d(16),
-            nn.ConvTranspose2d(16, 32, 3, stride=1),
-            nn.ReLU(),
-            nn.BatchNorm2d(32),
-            nn.ConvTranspose2d(32, 64, 3, stride=1),
-            nn.ReLU(),
-            nn.BatchNorm2d(64),            
-            nn.ConvTranspose2d(64, self.num_classes, 3, stride=1),            
+            #nn.ConvTranspose2d(self.num_classes, 16, 3, stride=1, padding=1),
+            #nn.ReLU(),
+            #nn.BatchNorm2d(16),
+            #nn.ConvTranspose2d(16, 16, 3, stride=1),
+            #nn.ReLU(),
+            #nn.BatchNorm2d(16),
+            #nn.ConvTranspose2d(16, 32, 3, stride=1),
+            #nn.ReLU(),
+            #nn.BatchNorm2d(32),
+            #nn.ConvTranspose2d(32, 64, 3, stride=1),
+            #nn.ReLU(),
+            #nn.BatchNorm2d(64),            
+            #nn.ConvTranspose2d(64, self.num_classes, 3, stride=1),            
             nn.UpsamplingBilinear2d(size=(self.img_size, self.img_size))
         )
     

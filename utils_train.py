@@ -58,8 +58,9 @@ def train_model(model, dataloaders, criterion, optimizer, writer, device, num_ep
                 running_corrects += torch.sum(preds == labels.data)
                 if phase == 'train':
                     writer.add_scalar('run/loss', running_loss, iterations)
-                    #writer.add_images('/run/ref_imgs', reference_img, iterations)
-                    #writer.add_images('/run/test_imgs', test_img, iterations)
+                    if iterations % 100 == 0:
+                        writer.add_images('/run/preds', preds, iterations)
+                        writer.add_images('/run/labels', labels, iterations)
                     iterations += 1
 
             epoch_loss = running_loss / len(dataloaders[phase].dataset)
