@@ -32,7 +32,7 @@ def train_model(model, dataloaders, criterion, optimizer, writer, device, num_ep
             for sample in dataloaders[phase]:                
                 reference_img = sample['reference'].to(device)
                 test_img = sample['test'].to(device)
-                labels = sample['label'].squeeze(1).type(torch.LongTensor).to(device)
+                labels = (sample['label']>0).squeeze(1).type(torch.LongTensor).to(device)
 
                 # zero the parameter gradients
                 optimizer.zero_grad()
@@ -65,10 +65,9 @@ def train_model(model, dataloaders, criterion, optimizer, writer, device, num_ep
             epoch_loss = running_loss / len(dataloaders[phase].dataset)
             epoch_acc = running_corrects.double() / len(dataloaders[phase].dataset)
 
-            print('{} Loss: {:.4f} Acc: {:.4f}'.format(phase, epoch_loss, epoch_acc))
+            print('{} Loss: {:.4f}'.format(phase, epoch_loss))
             
-            writer.add_scalar('epoch/loss_' + phase, epoch_loss, epoch)
-            writer.add_scalar('epoch/acc_' + phase, epoch_acc, epoch)            
+            writer.add_scalar('epoch/loss_' + phase, epoch_loss, epoch)           
 
             # deep copy the model and save if accuracy is better
             if phase == 'val' and epoch_acc > best_acc:
