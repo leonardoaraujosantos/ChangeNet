@@ -59,8 +59,10 @@ def train_model(model, dataloaders, criterion, optimizer, writer, device, num_ep
                 if phase == 'train':
                     writer.add_scalar('run/loss', running_loss, iterations)
                     if iterations % 100 == 0:
-                        writer.add_images('/run/preds', preds, iterations)
-                        writer.add_images('/run/labels', labels, iterations)
+                        # Calculate 1/10th of batch size
+                        num_imgs = reference_img.shape[0] // 10
+                        writer.add_images('/run/preds', preds[0:num_imgs].unsqueeze(1), iterations)
+                        writer.add_images('/run/labels', labels[0:num_imgs].unsqueeze(1), iterations)
                     iterations += 1
 
             epoch_loss = running_loss / len(dataloaders[phase].dataset)
