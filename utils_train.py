@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import numpy as np
+import seg_metrics
 import torch.nn.functional as F
 from torch.utils.tensorboard import SummaryWriter
 import os
@@ -27,6 +28,7 @@ def train_model(model, dataloaders, criterion, optimizer, sc_plt, writer, device
 
             running_loss = 0.0
             running_corrects = 0
+            list_dice_val = []
 
             # Iterate over data.
             for sample in dataloaders[phase]:                
@@ -46,7 +48,13 @@ def train_model(model, dataloaders, criterion, optimizer, sc_plt, writer, device
                     # Calculate Loss
                     loss = criterion(outputs, labels)
 
+                    # Get the correct class by looking for the max value across channels
                     _, preds = torch.max(outputs, 1)
+                    
+                    # Calculate metric during evaluation
+                    if phase == 'val':
+                        dice_value = seg_metrics.dice(preds, labels)
+                        list_dice_val.append(dice_value.item())
 
                     # backward + optimize only if in training phase
                     if phase == 'train':
@@ -57,7 +65,6 @@ def train_model(model, dataloaders, criterion, optimizer, sc_plt, writer, device
                 running_loss += loss.item() * reference_img.size(0)
                 running_corrects += torch.sum(preds == labels.data)
                 if phase == 'train':
-                    writer.add_scalar('run/loss', running_loss, iterations)
                     if iterations % 100 == 0:
                         # Calculate 1/10th of batch size
                         num_imgs = reference_img.shape[0] // 10
@@ -71,6 +78,9 @@ def train_model(model, dataloaders, criterion, optimizer, sc_plt, writer, device
             print('{} Loss: {:.4f}'.format(phase, epoch_loss))
             
             writer.add_scalar('epoch/loss_' + phase, epoch_loss, epoch)
+            if phase == 'val':
+                writer.add_scalar('metrics/dice_val', np.mean(list_dice_val), epoch)
+    
             
             # Update Scheduler if training loss doesn't change for patience(2) epochs
             if phase == 'train':

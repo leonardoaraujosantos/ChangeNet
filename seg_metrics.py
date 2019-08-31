@@ -34,25 +34,17 @@ def iou(model_outputs, labels):
     return iou.mean()
 
 
-# This version uses hard threshold so it can't be used on the loss function but is precise 
-# to verify the real dice coefficient
 def dice(model_outputs, labels):
-    #xt = torch.FloatTensor(x,requires_grad=True)
-    bin_model_outputs = torch.zeros_like(model_outputs, requires_grad=True).type(torch.FloatTensor)
-    bin_labels = (labels > 0).type(torch.FloatTensor)
+    model_outputs = model_outputs.clone()
+    labels = labels.clone()
     
-    # Convert all channels from model_outputs to binary
-    list_max = [torch.max(model_outputs[:,ch,:,:]) for ch in range(model_outputs.shape[1])]
-    list_min = [torch.min(model_outputs[:,ch,:,:]) for ch in range(model_outputs.shape[1])]
-    list_threshold = [(list_max[ch] - list_min[ch]) / 2.0 for ch in range(model_outputs.shape[1])]
-    for ch in range(model_outputs.shape[1]):
-        bin_model_outputs[:,ch,:,:] = model_outputs[:,ch,:,:] > list_threshold[ch]
         
     smooth = 1e-4
 
-    iflat = bin_model_outputs.view(-1)
-    tflat = bin_labels.view(-1)
-    intersection = (iflat * tflat).sum()
+    iflat = model_outputs.contiguous().view(-1)
+    tflat = labels.contiguous().view(-1)
+    intersection = torch.abs(iflat * tflat).sum()
     
     return 1 - ((2. * intersection + smooth) /
               (iflat.sum() + tflat.sum() + smooth))
+
