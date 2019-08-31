@@ -1,6 +1,7 @@
 from torch.utils.data import Dataset
 import numpy as np
 import pickle
+import torchvision
 
 class ChangeDatasetNumpy(Dataset):
     """ChangeDataset Numpy Pickle Dataset"""
@@ -25,7 +26,11 @@ class ChangeDatasetNumpy(Dataset):
         if self.transform:
             trf_reference = self.transform(sample['reference'])
             trf_test = self.transform(sample['test'])
-            trf_label = self.transform(sample['label'])
+            trf_label = sample['label']
+            # Dont do Normalize on label, all the other transformations apply...
+            for t in self.transform.transforms:
+                if not isinstance(t, torchvision.transforms.transforms.Normalize):
+                    trf_label = t(trf_label)
             sample = {'reference': trf_reference, 'test': trf_test, 'label': trf_label}
 
         return sample
