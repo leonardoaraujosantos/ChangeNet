@@ -49,19 +49,19 @@ class DeconvNetwork(nn.Module):
             nn.ReLU(),
             nn.BatchNorm2d(self.num_classes),
             # in_channels, out_channels, kernel_size, stride=1, padding=0,
-            #nn.ConvTranspose2d(self.num_classes, 16, 3, stride=1, padding=1),
-            #nn.ReLU(),
-            #nn.BatchNorm2d(16),
-            #nn.ConvTranspose2d(16, 16, 3, stride=1),
-            #nn.ReLU(),
-            #nn.BatchNorm2d(16),
-            #nn.ConvTranspose2d(16, 32, 3, stride=1),
-            #nn.ReLU(),
-            #nn.BatchNorm2d(32),
-            #nn.ConvTranspose2d(32, 64, 3, stride=1),
-            #nn.ReLU(),
-            #nn.BatchNorm2d(64),            
-            #nn.ConvTranspose2d(64, self.num_classes, 3, stride=1),            
+            nn.ConvTranspose2d(self.num_classes, 16, 3, stride=1, padding=1),
+            nn.ReLU(),
+            nn.BatchNorm2d(16),
+            nn.ConvTranspose2d(16, 16, 3, stride=1),
+            nn.ReLU(),
+            nn.BatchNorm2d(16),
+            nn.ConvTranspose2d(16, 32, 3, stride=1),
+            nn.ReLU(),
+            nn.BatchNorm2d(32),
+            nn.ConvTranspose2d(32, 64, 3, stride=1),
+            nn.ReLU(),
+            nn.BatchNorm2d(64),            
+            nn.ConvTranspose2d(64, self.num_classes, 3, stride=1),            
             nn.UpsamplingBilinear2d(size=(self.img_size, self.img_size))
         )
     
@@ -82,6 +82,7 @@ class ChangeNetBranch(nn.Module):
         self.ResnetFeatures = utils_resnet.resnet50(ResnetFeatures, pretrained=True)
         # Freeze Layers
         self.ResnetFeatures.set_parameter_requires_grad(feature_extracting=True)
+        self.ResnetFeatures.eval()
         
         # Instantiate deconvolution blocks
         self.deconv_network_cp3 = DeconvNetwork(512, img_size=img_size, num_classes=num_classes)
@@ -89,8 +90,12 @@ class ChangeNetBranch(nn.Module):
         self.deconv_network_cp5 = DeconvNetwork(2048, img_size=img_size, num_classes=num_classes)
     
     def forward(self, x):
+        # Mark Resnet to be evaluation mode 
+        self.ResnetFeatures.eval()
         features_tupple = self.ResnetFeatures(x)
         _, cp3,cp4,cp5 = features_tupple
+        
+        # Run Deconvolution Network
         feat_cp3 = self.deconv_network_cp3(cp3)
         feat_cp4 = self.deconv_network_cp4(cp4)
         feat_cp5 = self.deconv_network_cp5(cp5)
@@ -114,10 +119,11 @@ class ChangeNet(nn.Module):
         self.FC_1_cp5 = nn.Conv2d(num_classes*2, num_classes, kernel_size=1)
     
     def forward(self, x):
+        # Select reference/test inputs
         reference_img = x[0]
         test_img = x[1]
         
-        # Execute Siamese Networks
+        # Execute Branch Networks (ResNets + Deconvolutional Networks)
         feature_map_ref = self.branch_reference(reference_img)
         feature_map_test = self.branch_test(test_img)
         
