@@ -53,7 +53,7 @@ def train_model(model, dataloaders, criterion, optimizer, sc_plt, writer, device
                     
                     # Calculate metric during evaluation
                     if phase == 'val':
-                        dice_value = seg_metrics.dice(preds, labels)
+                        dice_value = seg_metrics.iou_segmentation(preds.squeeze(1).type(torch.LongTensor), (labels>0).type(torch.LongTensor))
                         list_dice_val.append(dice_value.item())
 
                     # backward + optimize only if in training phase
@@ -79,7 +79,7 @@ def train_model(model, dataloaders, criterion, optimizer, sc_plt, writer, device
             
             writer.add_scalar('epoch/loss_' + phase, epoch_loss, epoch)
             if phase == 'val':
-                writer.add_scalar('metrics/dice_val', np.mean(list_dice_val), epoch)
+                writer.add_scalar('metrics/iou_val', np.mean(list_dice_val), epoch)
     
             
             # Update Scheduler if training loss doesn't change for patience(2) epochs
