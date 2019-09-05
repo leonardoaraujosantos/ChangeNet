@@ -4,5 +4,5 @@ Implementation of the ChangeNet [paper](http://openaccess.thecvf.com/content_ECC
   
   #### Some Results
   ![alt text](https://raw.githubusercontent.com/leonardoaraujosantos/ChangeNet/master/docs/imgs/res_1.png)
-  ![alt text](https://raw.githubusercontent.com/leonardoaraujosantos/ChangeNet/master/docs/imgs/res_2.png)
-  ![alt text](https://raw.githubusercontent.com/leonardoaraujosantos/ChangeNet/master/docs/imgs/res_3.png)
+  ![alt text](https://raw.githubusercontent.com/leonardoaraujosantos/ChangeNet/master/docs/imgs/ref_2.png)
+  ![alt text](https://raw.githubusercontent.com/leonardoaraujosantos/ChangeNet/master/docs/imgs/ref_3.png)
