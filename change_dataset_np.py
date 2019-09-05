@@ -26,11 +26,17 @@ class ChangeDatasetNumpy(Dataset):
         if self.transform:
             trf_reference = self.transform(sample['reference'])
             trf_test = self.transform(sample['test'])
+            # Handle label class differently
             trf_label = sample['label']
             # Dont do Normalize on label, all the other transformations apply...
             for t in self.transform.transforms:
                 if not isinstance(t, torchvision.transforms.transforms.Normalize):
-                    trf_label = t(trf_label)
+                    # ToTensor divide every result by 255
+                    # https://pytorch.org/docs/stable/_modules/torchvision/transforms/functional.html#to_tensor
+                    if isinstance(t, torchvision.transforms.transforms.ToTensor):
+                        trf_label = t(trf_label) * 255.0
+                    else:
+                        trf_label = t(trf_label)                
             sample = {'reference': trf_reference, 'test': trf_test, 'label': trf_label}
 
         return sample
