@@ -3,6 +3,7 @@ Implementation of the ChangeNet [paper](http://openaccess.thecvf.com/content_ECC
 <Paste>
   
   #### Some Changes from Original paper
+  I did some few changes to squeeze some accuracy performance...
   1. Use of Focal Loss instead of CrossEntropy
   2. Use bigger Deconvolutio Network (Instead of FC-->Upsample)
   
