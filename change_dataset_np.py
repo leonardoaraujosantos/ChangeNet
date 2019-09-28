@@ -2,6 +2,8 @@ from torch.utils.data import Dataset
 import numpy as np
 import pickle
 import torchvision
+import random
+import helper_augmentations
 
 class ChangeDatasetNumpy(Dataset):
     """ChangeDataset Numpy Pickle Dataset"""
@@ -24,19 +26,28 @@ class ChangeDatasetNumpy(Dataset):
 
         # Handle Augmentations
         if self.transform:
-            trf_reference = self.transform(sample['reference'])
-            trf_test = self.transform(sample['test'])
-            # Handle label class differently
+            trf_reference = sample['reference']
+            trf_test = sample['test']          
             trf_label = sample['label']
             # Dont do Normalize on label, all the other transformations apply...
             for t in self.transform.transforms:
+                if isinstance(t, helper_augmentations.SwapReferenceTest):
+                    trf_reference, trf_test = t(sample)
+                else:
+                    # All other type of augmentations
+                    trf_reference = t(trf_reference)
+                    trf_test = t(trf_test)
+                
+                # Don't Normalize or Swap
                 if not isinstance(t, torchvision.transforms.transforms.Normalize):
                     # ToTensor divide every result by 255
                     # https://pytorch.org/docs/stable/_modules/torchvision/transforms/functional.html#to_tensor
                     if isinstance(t, torchvision.transforms.transforms.ToTensor):
                         trf_label = t(trf_label) * 255.0
                     else:
-                        trf_label = t(trf_label)                
+                        if not isinstance(t, helper_augmentations.SwapReferenceTest):
+                            trf_label = t(trf_label)
+                              
             sample = {'reference': trf_reference, 'test': trf_test, 'label': trf_label}
 
         return sample
