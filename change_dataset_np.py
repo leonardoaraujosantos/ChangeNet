@@ -46,7 +46,10 @@ class ChangeDatasetNumpy(Dataset):
                         trf_label = t(trf_label) * 255.0
                     else:
                         if not isinstance(t, helper_augmentations.SwapReferenceTest):
-                            trf_label = t(trf_label)
+                            if not isinstance(t, torchvision.transforms.transforms.ColorJitter):
+                                if not isinstance(t, torchvision.transforms.transforms.RandomGrayscale):
+                                    if not isinstance(t, helper_augmentations.JitterGamma):
+                                        trf_label = t(trf_label)
                               
             sample = {'reference': trf_reference, 'test': trf_test, 'label': trf_label}
 
