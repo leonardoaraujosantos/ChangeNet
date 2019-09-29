@@ -17,7 +17,7 @@ class ResnetFeatures(models.ResNet):
         if feature_extracting:
             # Mark parameters to be freezed
             for param in self.parameters():
-                param.requires_grad = False
+                param.requires_grad = not feature_extracting
         
     def forward(self, x):
         x = self.conv1(x)
@@ -81,7 +81,7 @@ class ChangeNetBranch(nn.Module):
         # Instantiate Resnet
         self.ResnetFeatures = utils_resnet.resnet50(ResnetFeatures, pretrained=True)
         # Freeze Layers
-        self.ResnetFeatures.set_parameter_requires_grad(feature_extracting=True)
+        self.ResnetFeatures.set_parameter_requires_grad(feature_extracting=False)
         self.ResnetFeatures.eval()
         
         # Instantiate deconvolution blocks
@@ -91,7 +91,7 @@ class ChangeNetBranch(nn.Module):
     
     def forward(self, x):
         # Mark Resnet to be evaluation mode 
-        self.ResnetFeatures.eval()
+        #self.ResnetFeatures.eval()
         features_tupple = self.ResnetFeatures(x)
         _, cp3,cp4,cp5 = features_tupple
         

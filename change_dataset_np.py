@@ -31,7 +31,7 @@ class ChangeDatasetNumpy(Dataset):
             trf_label = sample['label']
             # Dont do Normalize on label, all the other transformations apply...
             for t in self.transform.transforms:
-                if isinstance(t, helper_augmentations.SwapReferenceTest):
+                if (isinstance(t, helper_augmentations.SwapReferenceTest)) or (isinstance(t, helper_augmentations.JitterGamma)):
                     trf_reference, trf_test = t(sample)
                 else:
                     # All other type of augmentations
